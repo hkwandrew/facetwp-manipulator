@@ -62,16 +62,22 @@ class ui{
 	 * @access public
 	 */
 	public function auto_load() {
+		// Initialize $this->ui as an object if not already initialized
+		if ( ! is_object( $this->ui ) ) {
+			$this->ui = new \stdClass();
+		}
+
 		/**
 		 * do UI loader locations
 		 *
 		 * @param ui $this Current instance of this class
 		 */
 		do_action( 'fwpmanip_register', $this );
+		
 		// init the share object
 		fwpmanip_share();
 
-		// go over each locations
+		// go over each location
 		foreach ( $this->locations as $type => $paths ) {
 
 			if ( $this->is_callable( $type ) ) {
@@ -111,9 +117,19 @@ class ui{
 	 * @return object The instance of the object type or null if invalid
 	 */
 	public function add( $type, $slug, $structure, $parent = null ) {
+		// Ensure $this->ui is an object
+		if ( ! is_object( $this->ui ) ) {
+			$this->ui = new \stdClass();
+		}
+
+		// Ensure $this->ui->{$type} exists as an array
+		if ( ! isset( $this->ui->{$type} ) ) {
+			$this->ui->{$type} = [];
+		}
+
 		$init = $this->get_register_callback( $type );
 		if ( null !== $init ) {
-			$object                     = call_user_func_array( $init, array( $slug, $structure, $parent ) );
+			$object = call_user_func_array( $init, array( $slug, $structure, $parent ) );
 			$this->ui->{$type}[ $slug ] = $object;
 
 			return $object;
